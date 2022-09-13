@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Book_Store_Web.Data;
 using Book_Store_Web.Models;
+using Microsoft.Data.SqlClient;
 
 namespace Book_Store_Web.Controllers
 {
@@ -41,25 +42,57 @@ namespace Book_Store_Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,name,pass,email")] usersaccounts usersaccounts)
         {
-                usersaccounts.role = "customer";
-                _context.Add(usersaccounts);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+            usersaccounts.role = "customer";
+            _context.Add(usersaccounts);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(login));
         }
 
-        // GET: usersaccounts/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        // GET: usersaccounts/login
+        public IActionResult login()
         {
-            if (id == null || _context.usersaccounts == null)
-            {
-                return NotFound();
-            }
+            return View();
+        }
 
-            var usersaccounts = await _context.usersaccounts.FindAsync(id);
-            if (usersaccounts == null)
+        // POST: usersaccounts/login
+        [HttpPost, ActionName("login")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> login(string na, string pa)
+        {
+            SqlConnection conn1 = new SqlConnection("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\fadia\\Documents\\book_store_db.mdf;Integrated Security=True;Connect Timeout=30");
+            string sql;
+            sql = "SELECT * FROM usersaccounts where name ='" + na + "' and pass ='" + pa +"' ";
+            SqlCommand comm = new SqlCommand(sql, conn1);
+            conn1.Open();
+            SqlDataReader reader = comm.ExecuteReader();
+            if (reader.Read())
             {
-                return NotFound();
+                string role = (string)reader["role"];
+                string id = Convert.ToString((int)reader["Id"]);
+                HttpContext.Session.SetString("Name", na);
+                HttpContext.Session.SetString("Role", role);
+                HttpContext.Session.SetString("userid", id);
+                reader.Close();
+                conn1.Close();
+                if (role == "customer")
+                    return RedirectToAction("catalogue", "books");
+                else
+                    return RedirectToAction("Index", "books");
             }
+            else
+            {
+                ViewData["Message"] = "wrong user name password";
+                return View();
+            }
+        }
+
+        
+
+        // GET: usersaccounts/Edit/5
+        public async Task<IActionResult> Edit()
+        {
+          int id = Convert.ToInt32(HttpContext.Session.GetString("userid"));
+          var usersaccounts = await _context.usersaccounts.FindAsync(id);
             return View(usersaccounts);
         }
 
@@ -68,34 +101,15 @@ namespace Book_Store_Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,name,pass,email")] usersaccounts usersaccounts)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,name,pass,role,email")] usersaccounts usersaccounts)
         {
-            if (id != usersaccounts.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
+        
                     _context.Update(usersaccounts);
                     await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!usersaccountsExists(usersaccounts.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(usersaccounts);
+         
+                return RedirectToAction(nameof(login));
+         
+         
         }
 
        

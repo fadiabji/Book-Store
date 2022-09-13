@@ -27,6 +27,11 @@ namespace Book_Store_Web.Controllers
                           Problem("Entity set 'Book_Store_WebContext.book'  is null.");
         }
 
+        public async Task<IActionResult> catalogue()
+        {
+            return View(await _context.book.ToListAsync());
+        }
+
         // GET: books/Details/5
         public async Task<IActionResult> Details(int? id)
         {

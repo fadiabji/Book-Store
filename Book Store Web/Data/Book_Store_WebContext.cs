@@ -17,5 +17,9 @@ namespace Book_Store_Web.Data
         public DbSet<Book_Store_Web.Models.book> book { get; set; } = default!;
 
         public DbSet<Book_Store_Web.Models.usersaccounts>? usersaccounts { get; set; }
+
+        public DbSet<Book_Store_Web.Models.orders>? orders { get; set; }
+
+        public DbSet<Book_Store_Web.Models.report>? report { get; set; }
     }
 }
