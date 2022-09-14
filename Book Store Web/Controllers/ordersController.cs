@@ -9,6 +9,7 @@ using Book_Store_Web.Data;
 using Book_Store_Web.Models;
 using System.Net;
 using System.Xml.Linq;
+using Microsoft.Data.SqlClient;
 
 namespace Book_Store_Web.Controllers
 {
@@ -48,9 +49,10 @@ namespace Book_Store_Web.Controllers
         }
 
         // GET: orders/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int? id)
         {
-            return View();
+            var book = await _context.book.FindAsync(id);
+            return View(book);
         }
 
         // POST: orders/Create
@@ -63,10 +65,18 @@ namespace Book_Store_Web.Controllers
             orders order = new orders();
             order.bookId = bookId;
             order.quantity = quantity;
-            order.userid = Convert.ToInt32(HttpContext.Session.GetString("userid")); ;
+            order.userid = Convert.ToInt32(HttpContext.Session.GetString("userid")); 
             order.orderdate = DateTime.Today;
+
+            SqlConnection conn = new SqlConnection("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\fadia\\Documents\\book_store_db.mdf;Integrated Security=True;Connect Timeout=30");
+            string sql;
+            sql = "UPDATE book  SET bookquantity  = bookquantity   - '" + order.quantity + "'  where (id ='" + order.bookId + "' )";
+            SqlCommand comm = new SqlCommand(sql, conn);
+            conn.Open();
+            comm.ExecuteNonQuery();
             _context.Add(order);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(myorders));
            
         }

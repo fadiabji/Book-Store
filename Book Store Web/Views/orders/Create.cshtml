@@ -1,19 +1,13 @@
 ﻿@model Book_Store_Web.Models.book
 
-@{
+@*@{
     ViewData["Title"] = "Create";
 }
-
+*@
 <h1>Create</h1>
 
     <hr />
 <dl class="row">
-<dt class = "col-sm-2">
-        @Html.DisplayNameFor(model => model.Id)
-</dt>
-<dd class = "col-sm-10">
-        @Html.DisplayFor(model => model.Id)
-</dd>
 <dt class = "col-sm-2">
         @Html.DisplayNameFor(model => model.title)
 </dt>
@@ -48,7 +42,7 @@
 Pic
 </dt>
 <dd>
-<img src="~/images/@Model.imgfile" height="150" />
+    <img src="~/images/@Model.imgfile" height="150" />
 <br />@Model.imgfile
 </dd>
 </dl>
